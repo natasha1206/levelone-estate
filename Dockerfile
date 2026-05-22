@@ -27,28 +27,26 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Set working directory
 WORKDIR /var/www/html
 
-# Copy application
+# Copy application files
 COPY . .
 
-# Create ALL necessary directories and set permissions
+# Create ALL necessary directories
 RUN mkdir -p /var/www/html/bootstrap/cache \
-    && mkdir -p /var/www/html/storage \
-    && mkdir -p /var/www/html/storage/framework \
     && mkdir -p /var/www/html/storage/framework/sessions \
     && mkdir -p /var/www/html/storage/framework/views \
-    && mkdir -p /var/www/html/storage/framework/cache \
+    && mkdir -p /var/www/html/storage/framework/cache/data \
     && mkdir -p /var/www/html/storage/logs \
-    && mkdir -p /var/www/html/storage/app/public \
-    && chmod -R 777 /var/www/html/bootstrap/cache \
-    && chmod -R 777 /var/www/html/storage
+    && mkdir -p /var/www/html/storage/app/public
 
-# Install dependencies
-RUN composer install --no-interaction --optimize-autoloader --no-dev
-
-# Set proper ownership
+# Fix ownership and permissions BEFORE installing dependencies
 RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html/storage \
-    && chmod -R 755 /var/www/html/bootstrap/cache
+    && chmod -R 775 /var/www/html/storage \
+    && chmod -R 775 /var/www/html/bootstrap/cache
+
+# Switch user context or run composer safely
+# Note: If your container runs as root, composer may need permission flags,
+# but the underlying directories are now completely ready.
+RUN composer install --no-interaction --optimize-autoloader --no-dev
 
 # Expose port
 EXPOSE 80
