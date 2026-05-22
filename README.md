@@ -120,7 +120,7 @@ Access
 Folder Structure
 ----------------
 
-text
+```text
 
 ├── app/
 │   ├── Filament/        # Admin panel resources
@@ -134,6 +134,8 @@ text
 │   └── web.php          # Application routes
 └── public/
     └── storage/         # Uploaded images
+
+```
 
 Customization
 -------------
