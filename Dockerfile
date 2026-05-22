@@ -44,16 +44,16 @@ RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 775 /var/www/html/bootstrap/cache
 
 # --- FIX INTERCEPTOR FOR LARAVEL CLOUD BUILD ---
-# Force PostgreSQL placeholder configuration during build stage so it matches your extensions
-ARG APP_KEY="base64:d2dfbW9iaWxlYm90Y2hhbmdldGhpczMydW5pcXVla2V5bW9yZQ=="
+# Safe, isolated configuration used ONLY during the image build phase
+ARG APP_KEY="base64:xyGr6YAvIq1LXwIhTRNgQa6UsdFeu6UfQmutL7HWt+Q="
 ENV APP_KEY=${APP_KEY}
 ENV APP_ENV=production
 ENV DB_CONNECTION=pgsql
 ENV DB_HOST=127.0.0.1
 ENV DB_PORT=5432
-ENV DB_DATABASE=forge
-ENV DB_USERNAME=forge
-ENV DB_PASSWORD=
+ENV DB_DATABASE=laravel_build
+ENV DB_USERNAME=laravel
+ENV DB_PASSWORD=secret_build_placeholder
 # -----------------------------------------------
 
 # Install dependencies safely
