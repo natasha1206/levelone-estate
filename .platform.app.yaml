@@ -1,0 +1,17 @@
+name: app
+type: php:8.2
+build:
+    flavor: none
+
+hooks:
+    build: |
+        set -e
+        mkdir -p bootstrap/cache
+        chmod 777 bootstrap/cache
+        composer install --no-interaction --optimize-autoloader --no-dev
+
+web:
+    commands:
+        start: |
+            php artisan migrate --force
+            php artisan storage:link
