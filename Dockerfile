@@ -15,11 +15,16 @@ RUN apt-get update && apt-get install -y \
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install PHP extensions (Kept Postgres, removed unnecessary mysql)
+# Install PHP extensions
 RUN docker-php-ext-install mbstring exif pcntl bcmath gd zip pdo_pgsql
 
 # Enable Apache mod_rewrite
 RUN a2enmod rewrite
+
+# --- INSTALL NODE.JS & NPM ---
+RUN curl -sL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install -y nodejs
+# ------------------------------
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -43,8 +48,7 @@ RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 775 /var/www/html/storage \
     && chmod -R 775 /var/www/html/bootstrap/cache
 
-# --- FIX INTERCEPTOR FOR LARAVEL CLOUD BUILD ---
-# Safe, isolated configuration used ONLY during the image build phase
+# Fix interceptor for Laravel Cloud Build stage
 ARG APP_KEY="base64:xyGr6YAvIq1LXwIhTRNgQa6UsdFeu6UfQmutL7HWt+Q="
 ENV APP_KEY=${APP_KEY}
 ENV APP_ENV=production
@@ -54,10 +58,15 @@ ENV DB_PORT=5432
 ENV DB_DATABASE=laravel_build
 ENV DB_USERNAME=laravel
 ENV DB_PASSWORD=secret_build_placeholder
-# -----------------------------------------------
 
-# Install dependencies safely
+# Install PHP dependencies safely
 RUN composer install --no-interaction --optimize-autoloader --no-dev
+
+# --- COMPILE VITE ASSETS FOR PRODUCTION ---
+RUN npm install \
+    && npm run build \
+    && chown -R www-data:www-data /var/www/html/public/build
+# ------------------------------------------
 
 # Expose port
 EXPOSE 80
